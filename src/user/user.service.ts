@@ -20,6 +20,7 @@ export class UserService {
         newUser.name = user.name;
         newUser.username = user.username;
         newUser.password = passwordHash;
+        newUser.roles = user.roles;
         return from(this.usersRepository.save(newUser)).pipe(map((user:User)=>{
           const {password, ...result} = user;
           return result;
@@ -36,7 +37,8 @@ export class UserService {
       const {password, ...result} = user;
       return result;
     }));
- }findAll():Observable<User[]>{
+ }
+ findAll():Observable<User[]>{
     return from(this.usersRepository.find()).pipe(map((users:UserEntity[])=>{
       users.forEach((user=>{delete user.password;}));
       return users;
@@ -72,6 +74,13 @@ export class UserService {
   }
   findByMail(email:string):Observable<User>{
     return from(this.usersRepository.findOne({where:{email:email}}))
+  }
+  findByUserName(username:string):Observable<User>{
+    return from(this.usersRepository.findOne({where:{username:username}}))
+  }
+
+  updateRoleOfUser(id:number, user:User): Observable<any>{
+    return from(this.usersRepository.update(id, user));
   }
 
 }
