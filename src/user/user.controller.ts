@@ -1,7 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from "@nestjs/common";
 import { User } from "./models/user.interface";
 import { catchError, map, Observable, of } from "rxjs";
 import { UserService } from "./user.service";
+import { hasRoles } from "../decorators/roles.decoratos";
+import { RolesGuard } from "../guards/roles-guards";
+import { JwtAuthGuard } from "../guards/jwt-guard";
+import { UserRole } from "./models/user.entity";
 
 @Controller('user')
 export class UserController {
@@ -24,6 +28,8 @@ export class UserController {
     return this.userService.findOne(params.id)
   }
   @Get()
+  @hasRoles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   findAll():Observable<User[]>{
     return this.userService.findAll();
   }
@@ -35,5 +41,11 @@ export class UserController {
 @Put(':id')
   updateOne(@Param('id') id: string, @Body() user: User): Observable<any>{
     return this.userService.updateOne(Number(id), user);
+}
+ @Patch(':id')
+ @hasRoles(UserRole.ADMIN)
+ @UseGuards(JwtAuthGuard, RolesGuard)
+  updateRoleOfUser(@Param('id') id:string, @Body()user:User): Observable<User>{
+  return this.userService.updateRoleOfUser(Number(id), user);
 }
 }
